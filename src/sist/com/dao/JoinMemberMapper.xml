@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sist.com.Bean.Member" ><!-- 반드시 namespace를 설정 -->
+ 
+ <select id="idCheck" parameterType="String" resultType="String">
+ 	SELECT ID FROM MEMBER 
+ 	WHERE ID=#{VALUE}
+ </select>
+ 
+ <select id="selectZipCode" parameterType="String" resultType="zipcode">	
+	SELECT ZIPCODE,SIDO,GUGUN,DONG,NVL(BUNJI,' ')BUNJI 
+	FROM ZIPCODE
+	WHERE DONG LIKE '%'||#{VALUE}||'%'
+ </select>
+ 
+ <insert id="insertMember" parameterType="member">
+ 	INSERT INTO MEMBER (NO,ZIPCODE,NAME,ID,PASSWORD,ADDRESS,EMAIL,BIRTH,TEL,CP,ADMIN)
+ 	VALUES(#{no},#{zipcode},#{name},#{id},#{password},#{address},#{email},#{birthday},#{tel},#{cp},#{admin})
+ </insert>
+ <select id="getSequence2" resultType="Integer">
+ 	SELECT JOINMEMBER_SEQ.NEXTVAL FROM DUAL
+ </select>
+ <select id="loginCheck" parameterType="String" resultType="String">
+ SELECT PASSWORD FROM MEMBER 
+ 	WHERE ID=#{VALUE}
+ </select>
+</mapper>

@@ -1,0 +1,4 @@
+footer{position:absolute; top:2200px; left:5px; }
+#border{float:right;  border-top:solid 1px #CCC; border-bottom:1px solid #ccc; width:1223px; text-align:right; position:absolute; top:20px; left:10px; padding:10px; font-size:13px; font-weight:bold;}
+#address{position:relative; top:-17px; left:690px; text-align: left; font-size:14px; text-align:right; color:#ABABAB; font-size:13px; font-weight:bold;}
+footer #footer_logo{width:179px; height:80px; padding:5px 10px; position:relative; top:60px;}

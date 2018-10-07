@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sist.com.bean.ScheduleBean">
+
+<resultMap type="Schedule" id="selectScheduleID">
+	<result property="S_NO" jdbcType="VARCHAR" column="S_NO" />
+	<result property="P_NO" jdbcType="VARCHAR" column="P_NO" />
+	<result property="AL_NO" jdbcType="VARCHAR" column="AL_NO" />
+	<result property="AP_NO" jdbcType="VARCHAR" column="AP_NO" />
+	<result property="AP_NO2" jdbcType="VARCHAR" column="AP_NO2" />
+	<result property="DEPARTTIME" jdbcType="VARCHAR" column="departTime" />
+	<result property="ARRIVALTIME" jdbcType="VARCHAR" column="arrivalTime" />
+	<result property="LEAD" jdbcType="VARCHAR" column="lead" />
+	<result property="COST" jdbcType="BIGINT" column="cost" />
+	<result property="SEAT" jdbcType="BIGINT" column="seat" />
+	
+</resultMap>
+
+
+<select id="selectScheduleFil" resultType="Schedule" resultMap="selectScheduleID"    parameterType= "java.util.HashMap"  >
+SELECT S_NO, P_NO, AL_NO, AP_NO, AP_NO2, DEPARTTIME, ARRIVALTIME, LEAD, COST, SEAT
+FROM SCHEDULE
+<if test="searchOption!=null">	
+	WHERE ${searchOption} LIKE '%'||#{searchText}||'%'
+</if>
+</select>
+
+<insert id="insertSchedule" parameterType="schedule">
+	INSERT INTO SCHEDULE VALUES(#{sNo},#{pNo},#{alNo},#{apNo},#{apNo2},
+	#{departTime},#{arrivalTime},#{lead},#{cost},#{seat})
+</insert>
+
+<select id="selectScheduleInfo" resultType="schedule"  parameterType="int" resultMap="selectScheduleID" >
+SELECT S_NO, P_NO, AL_NO, AP_NO, AP_NO2, DEPARTTIME, ARRIVALTIME, LEAD, COST, SEAT
+FROM SCHEDULE
+WHERE S_NO=#{sNo}
+</select> 
+
+<update id="modifySchedule" parameterType="schedule" >
+UPDATE schedule
+ SET
+AL_NO=#{alNo}, P_NO=#{pNo}, AP_NO=#{apNo}, AP_NO2=#{apNo2}, DEPARTTIME=#{departTime}, 
+ARRIVALTIME=#{arrivalTime}, LEAD=#{lead}, COST=#{cost}, SEAT=#{seat}
+WHERE S_NO=#{sNo}
+</update>
+
+</mapper>

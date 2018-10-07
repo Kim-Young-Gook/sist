@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 불러오는 속성들은 복사하여 리스트 확인후 삭제하길 권장 -->
+<!-- id; firstName; lastName; email; -->
+
+<mapper namespace="sist.com.bean.AirSchedule">
+	<!-- 반드시 namespace를 설정 id의 충돌을 방지하기 위해 네임스페이스 사용 유니크한 패키지 클래스명을 주로 사용 -->
+
+	<!-- <select id="getSequence" resultType="Integer"> SELECT BOARD_SEQ.NEXTVAL 
+		FROM DUAL </select> -->
+
+	<!-- <insert id="insertBoard" parameterType="board"> INSERT INTO BOARD(no,title,writer,password,contents,regdate,hit,fileName) 
+		VALUES (BOARD_SEQ.NEXTVAL,#{title},#{writer},#{password},#{contents},SYSDATE,0,#{fileName}) 
+		<selectKey keyProperty="no" order="BEFORE" resultType="java.lang.Integer"> 
+		SELECT BOARD_SEQ.NEXTVAL FROM DUAL </selectKey> INSERT INTO BOARD(no,title,writer,password,contents,regdate,hit,fileName) 
+		VALUES (BOARD_SEQ.NEXTVAL,#{title},#{writer},#{password},#{contents},SYSDATE,0,#{fileName}) 
+		INSERT INTO BOARD(no,title,writer,password,contents,regdate,hit,fileName,ref,step,lev,pnum,reply) 
+		VALUES (#{no},#{title},#{writer},#{password},#{contents},SYSDATE,0,#{fileName},#{ref},#{step},#{lev},#{pnum},0) 
+		</insert> -->
+
+	<!-- <select id="selectBoard" resultType="schedule" parameterType="java.util.HashMap"> 
+		SELECT RM,no,title,writer,password,contents,regdate,hit,fileName FROM( SELECT 
+		ROWNUM RM,no,title,writer,password,contents,regdate,hit,fileName FROM( SELECT 
+		no,title,writer,password,contents,TO_CHAR(regdate,'YY/MM/DD')regdate,hit,fileName 
+		FROM BOARD <if test="query!=null"> WHERE ${query} LIKE '%'||#{data}||'%' 
+		</if> ORDER BY no)) WHERE RM BETWEEN #{start} AND #{end} resultMap="selectBoardID" 
+		parameterType="java.util.HashMap"> SELECT RM,no,title,writer,password,contents,regdate,hit,fileName,ref,step,lev,pnum,reply 
+		FROM( SELECT ROWNUM RM,no,title,writer,password,contents,regdate,hit,fileName,ref,step,lev,pnum,reply 
+		FROM( SELECT no,title,writer,password,contents,TO_CHAR(regdate,'YY/MM/DD')regdate,hit,fileName,ref,step,lev,pnum,reply 
+		FROM BOARD <if test="query!=null"> WHERE ${query} LIKE '%'||#{data}||'%' 
+		</if> ORDER BY REF DESC,STEP)) WHERE RM BETWEEN #{start} AND #{end} </select> -->
+
+	<!-- <select id="selectInfoboard" parameterType="int" resultType="board"> 
+		SELECT no,title,writer,password,contents,TO_CHAR(regdate,'YY/MM/DD')regdate,hit,fileName, 
+		ref,step,lev,pnum,reply FROM BOARD WHERE NO=#{VALUE} </select> -->
+	<select id="getTotalRow3" resultType="int"
+		parameterType="java.util.HashMap">
+		SELECT COUNT(*) FROM SCHEDULE
+		NATURAL JOIN AIRPORT
+		<if test="departure!=null">
+			WHERE
+			NAME LIKE '%'||#{departure}||'%'
+		</if>
+	</select>
+
+	<select id="selectSchedule" resultType="schedule"
+		parameterType="java.util.HashMap">
+		SELECT RM, S_NO, DEPARTTIME, ARRIVALTIME,
+		LEAD, COST, b.name AP_NO, d.name AP_NO2, c.name AL_NO
+		FROM
+		(SELECT ROWNUM RM, AP_NO, S_NO, P_NO, AL_NO, AP_NO2, DEPARTTIME, ARRIVALTIME,
+		LEAD, COST, SEAT FROM SCHEDULE ) a
+		INNER JOIN AIRPORT b on a.AP_NO=b.AP_NO
+		INNER JOIN AIRPORT d on a.AP_NO2=d.AP_NO
+		INNER JOIN AIRLINE c on a.AL_NO=c.AL_NO
+		WHERE
+		RM BETWEEN #{start} AND #{end}
+		<if test="departure!=null">
+			AND
+			b.name LIKE '%'||#{departure}||'%'
+		</if>
+		<if test="arrival!=null">
+			AND
+			d.name LIKE '%'||#{arrival}||'%'
+		</if>
+	</select>
+</mapper>
+<!-- departure = arrival = r datepicker1 datepicker2 persons = r -->

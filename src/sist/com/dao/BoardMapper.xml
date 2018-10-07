@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sist.com.bean.Board">
+	<resultMap type="board" id="selectBoardID">
+		<result property="rm" jdbcType="BIGINT" column="rm" />
+		<result property="no" jdbcType="BIGINT" column="no" />
+		<result property="title" jdbcType="VARCHAR" column="subject" />
+		<result property="writer" jdbcType="VARCHAR" column="writer" />
+		<result property="password" jdbcType="VARCHAR" column="password" />
+		<result property="contents" jdbcType="VARCHAR" column="contents" />
+		<result property="regdate" jdbcType="VARCHAR" column="regdate" />
+		<result property="hit" jdbcType="BIGINT" column="hit" />
+		<result property="fileName" jdbcType="VARCHAR" column="fileName" />
+		<result property="category" jdbcType="VARCHAR" column="category" />
+	</resultMap>
+	
+	<update id="updateBoard" parameterType="board">
+		UPDATE REVIEWBOARD SET
+		TITLE=#{title}, PASSWORD=#{password}, WRITER=#{writer}, CONTENTS=#{contents},CATEGORY=#{category}
+		<if test="fileName!=null">
+		, FILENAME=#{fileName}
+		</if>
+		WHERE NO=#{no}
+	</update>
+
+
+	<select id="selectBoard" resultType="board" resultMap="selectBoardID"
+
+		parameterType="java.util.HashMap">
+		SELECT 
+			RM,NO, title, WRITER, PASSWORD, CONTENTS,REGDATE, HIT,FILENAME,REF,STEP,LEV,REPLY,CATEGORY
+			FROM(
+			SELECT ROWNUM RM,NO, title, WRITER,
+			PASSWORD, CONTENTS,
+			REGDATE, HIT, FILENAME,REF,STEP,LEV,REPLY,CATEGORY
+			FROM(
+			SELECT NO, title, WRITER, PASSWORD, CONTENTS,
+			TO_CHAR(REGDATE,'YYYY/MM/DD')REGDATE, HIT, FILENAME,
+			REF,STEP,LEV,REPLY,CATEGORY
+			FROM REVIEWBOARD 
+			WHERE 1=1
+			<if test="query!=null">
+				AND ${query} LIKE '%'||#{data}||'%'
+			</if>
+			<if test="category!=null and category != ''">
+				AND category LIKE '%'||#{category}||'%' 
+			</if>		
+			ORDER BY REF DESC,STEP,LEV
+			)
+		)		
+		WHERE RM BETWEEN #{start} AND #{end}
+
+	</select>
+	
+	
+	<select id="getTotalRow" resultType="Integer" parameterType="HashMap">
+		SELECT COUNT(*) FROM REVIEWBOARD
+		WHERE 1=1
+		<if test="query!=null">
+			AND ${query} LIKE '%'||#{data}||'%'   <!--컬럼이 바뀔때 ${} 사용 동적으로사용하기위함 -->
+		</if>
+		<if test="category!=null and category!='' ">
+			AND CATEGORY LIKE '%'||#{category}||'%'
+		</if>
+	</select>
+
+	<select id="getSequence" resultType="Integer">
+		SELECT REVIEWBOARD_SEQ.NEXTVAL
+		FROM DUAL
+	</select>
+
+	<update id="updateStep" parameterType="board">
+
+		UPDATE REVIEWBOARD SET
+		<choose>
+			<when test="job=='reply'">
+				STEP = STEP+1
+			</when>
+			<when test="job=='delete'">
+				STEP = STEP-1
+			</when>
+		</choose>
+		WHERE REF = #{ref} AND STEP > #{step}
+
+	</update>
+
+
+	<update id="updateReply" parameterType="board">
+		UPDATE REVIEWBOARD SET
+		<if test="job=='reply'"> 
+		REPLY = REPLY+1 
+		</if>
+		<if test="job=='delete'">
+			REPLY = REPLY-1
+		</if>
+		
+		<!-- <choose> <when test="job=='reply'"> REPLY = REPLY+1 </when> <otherwise> 
+			REPLY = REPLY-1 </otherwise> </choose> -->
+		WHERE NO=#{pnum}
+	</update>
+
+
+	<insert id="insertBoard" parameterType="board">
+		<!-- <selectKey keyProperty="no" order="BEFORE" resultType="java.lang.Integer"> 
+			SELECT BOARD_SEQ.NEXTVAL FROM DUAL </selectKey> insert하기전에 시퀀스값 설정 -->
+		INSERT INTO
+		REVIEWBOARD(NO,TITLE,WRITER,PASSWORD,CONTENTS,REGDATE,HIT,FILENAME,REF,STEP,LEV,PNUM,REPLY,CATEGORY)
+		VALUES(#{no},#{title},#{writer},#{password},#{contents},SYSDATE,0,#{fileName},#{ref},#{step},#{lev},#{pnum},0,#{category})
+	</insert>
+	<update id=""></update>
+	
+	<delete id="deleteBoard" parameterType="board">
+		DELETE FROM REVIEWBOARD WHERE
+		NO =#{no}
+		
+	</delete>
+
+	<update id="updateHit" parameterType="int">
+		UPDATE REVIEWBOARD SET HIT =
+		HIT+1
+		WHERE NO =#{VALUE}
+	</update>
+
+	<select id="getPassWord" parameterType="Integer" resultType="String">
+		SELECT PASSWORD FROM REVIEWBOARD
+		WHERE NO = #{VALUE}
+	</select>
+	
+
+	<select id="selectInfoBoard" parameterType="int" resultType="board">
+		SELECT ROWNUM RM, NO, TITLE, WRITER, PASSWORD, CONTENTS,
+		TO_CHAR(REGDATE,'YYYY/MM/DD')REGDATE, HIT, FILENAME,
+		REF,STEP,LEV,PNUM,REPLY
+		FROM REVIEWBOARD
+		WHERE NO
+		=#{no}
+	</select>
+
+	<!-- <insert id="insertBoard" parameterType="board"> INSERT INTO BOARD(NO,TITLE,WRITER,PASSWORD,CONTENTS,REGDATE,HIT,FILENAME) 
+		VALUES(BOARD_SEQ.NEXTVAL,#{title},#{writer},#{password},#{contents},SYSDATE,0,#{fileName}) 
+		</insert> -->
+</mapper>
